@@ -47,7 +47,7 @@ func SetupRoutes(router *gin.Engine) {
 		issues.PATCH("/:issueId/:status")
 	}
 
-	locations := router.Group("/locations")
+	locations := router.Group("/api/v1/locations")
 	{
 		locations.GET("/:locationId")
 		locations.GET("/")
@@ -55,6 +55,21 @@ func SetupRoutes(router *gin.Engine) {
 		locations.POST("/")
 
 		locations.PATCH("/:locationId")
-		locations.PATCH("/:locationId:/status")
+		locations.PATCH("/:locationId/:status")
+	}
+
+	routes := router.Group("/api/v1/routes")
+	{
+		routes.GET("/:routeId")
+		routes.GET("/total-data")
+		routes.GET("/city-node")
+		routes.GET("/dark-node")
+		routes.GET("/node-list")
+
+		routes.POST("/")
+		routes.POST("/get-paginated-data")
+
+		routes.PATCH("/:routeId")
+		routes.PATCH("/:routeId/:status")
 	}
 }
