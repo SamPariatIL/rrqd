@@ -72,4 +72,32 @@ func SetupRoutes(router *gin.Engine) {
 		routes.PATCH("/:routeId")
 		routes.PATCH("/:routeId/:status")
 	}
+
+	nodes := router.Group("/api/v1/nodes")
+	{
+		nodes.GET("/:nodeId")
+		nodes.GET("/total-data")
+		nodes.GET("/incharge/bags")
+		nodes.GET("/incharge/packages")
+		nodes.GET("/incharge/issued-shipments")
+		nodes.GET("/users")
+		nodes.GET("/incharge/bag/:bagId")
+		nodes.GET("/incharge/package/:packageId")
+		nodes.GET("/:nodeId/users")
+		nodes.GET("/incharge/node")
+		nodes.GET("/payments/riders/:riderId")
+		nodes.GET("/payments/vendors/:vendorId")
+		nodes.GET("/payments")
+		nodes.GET("/return-details")
+
+		nodes.POST("/")
+		nodes.POST("/get-paginated-data")
+		nodes.POST("/complaints")
+		nodes.POST("/returns")
+		nodes.POST("/get-multiple-returns")
+		nodes.POST("/raise-complaint")
+
+		nodes.PATCH("/:nodeId")
+		nodes.PATCH("/:nodeId/:status")
+	}
 }
