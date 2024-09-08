@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/SamPariatIL/rrqd/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -16,7 +17,9 @@ func InitMongoDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	opts := options.Client().ApplyURI("")
+	conf := config.GetConfig()
+
+	opts := options.Client().ApplyURI(conf.MongoConfig.MongoDBInstance)
 	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB %s", err)
@@ -35,5 +38,5 @@ func InitMongoDB() {
 
 	log.Println("Connected to MongoDB")
 	MongoClient = client
-	Database = client.Database("")
+	Database = client.Database(conf.MongoConfig.MongoDBName)
 }
