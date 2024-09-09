@@ -13,6 +13,10 @@ func SetupRoutes(router *gin.Engine) {
 
 	// transactionManager := utils.NewTransactionManager(db)
 
+	authRepository := repository.NewAuthRepository(db)
+	authService := services.NewAuthService(authRepository)
+	authHandler := handlers.NewAuthHandler(authService)
+
 	dashboardRepository := repository.NewDashboardRepository(db)
 	dashboardService := services.NewDashboardService(dashboardRepository)
 	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
@@ -20,6 +24,10 @@ func SetupRoutes(router *gin.Engine) {
 	dropdownRepository := repository.NewDropdownRepository(db)
 	dropdownService := services.NewDropdownService(dropdownRepository)
 	dropdownHandler := handlers.NewDropdownHandler(dropdownService)
+
+	nodeRepository := repository.NewNodeRepository(db)
+	nodeService := services.NewNodeService(nodeRepository)
+	nodeHandler := handlers.NewNodeHandler(nodeService)
 
 	packageRepository := repository.NewPackageRepository(db)
 	packageService := services.NewPackageService(packageRepository)
@@ -31,20 +39,20 @@ func SetupRoutes(router *gin.Engine) {
 
 	auth := router.Group("/api/v1/auth")
 	{
-		auth.GET("/refresh-token")
-		auth.GET("/verify-otp")
-		auth.GET("/warehouse/verify-otp")
-		auth.GET("/delivery/verify-otp")
+		auth.GET("/refresh-token", authHandler.RefreshToken)
+		auth.GET("/verify-otp", authHandler.VerifyOTP)
+		auth.GET("/warehouse/verify-otp", authHandler.WarehouseVerifyOTP)
+		auth.GET("/delivery/verify-otp", authHandler.DeliveryVerifyOTP)
 
-		auth.POST("/login")
-		auth.POST("/change-password")
-		auth.POST("/send-otp")
-		auth.POST("/reset-password")
-		auth.POST("/warehouse/send-otp")
-		auth.POST("/delivery/send-otp")
-		auth.POST("/principals/login")
-		auth.POST("/principals/reset-password")
-		auth.POST("/principals/change-password")
+		auth.POST("/login", authHandler.Login)
+		auth.POST("/update-password", authHandler.UpdatePassword)
+		auth.POST("/send-otp", authHandler.SendOTP)
+		auth.POST("/reset-password", authHandler.ResetPassword)
+		auth.POST("/warehouse/send-otp", authHandler.WarehouseLogin)
+		auth.POST("/delivery/send-otp", authHandler.DeliveryLogin)
+		auth.POST("/principals/login", authHandler.PrincipalLogin)
+		auth.POST("/principals/reset-password", authHandler.PrincipalResetPassword)
+		auth.POST("/principals/update-password", authHandler.UpdatePrincipalPassword)
 	}
 
 	dashboard := router.Group("/api/v1/dashboard")
@@ -132,30 +140,28 @@ func SetupRoutes(router *gin.Engine) {
 
 	nodes := router.Group("/api/v1/nodes")
 	{
-		nodes.GET("/:nodeId")
-		nodes.GET("/total-data")
-		nodes.GET("/incharge/bags")
-		nodes.GET("/incharge/packages")
-		nodes.GET("/incharge/issued-shipments")
-		nodes.GET("/users")
-		nodes.GET("/incharge/bag/:bagId")
-		nodes.GET("/incharge/package/:packageId")
-		nodes.GET("/:nodeId/users")
-		nodes.GET("/incharge/node")
-		nodes.GET("/payments/riders/:riderId")
-		nodes.GET("/payments/vendors/:vendorId")
-		nodes.GET("/payments")
-		nodes.GET("/return-details")
+		nodes.GET("/:nodeId", nodeHandler.GetNodeById)
+		nodes.GET("/incharge/bags", nodeHandler.GetBags)
+		nodes.GET("/incharge/packages", nodeHandler.GetPackages)
+		nodes.GET("/incharge/issued-shipments", nodeHandler.GetIssuedShipments)
+		nodes.GET("/users", nodeHandler.GetNodeUsers)
+		nodes.GET("/incharge/bag/:bagId", nodeHandler.GetBagById)
+		nodes.GET("/incharge/package/:packageId", nodeHandler.GetPackageById)
+		nodes.GET("/:nodeId/users", nodeHandler.GetNodeUsers)
+		nodes.GET("/incharge/node", nodeHandler.GetNodeByInchargeId)
+		nodes.GET("/payments/riders/:riderId", nodeHandler.GetRiderPayments)
+		nodes.GET("/payments/vendors/:vendorId", nodeHandler.GetVendorPayments)
+		nodes.GET("/return-details", nodeHandler.GetReturnDetails)
 
-		nodes.POST("/")
-		nodes.POST("/get-paginated-data")
-		nodes.POST("/complaints")
-		nodes.POST("/returns")
-		nodes.POST("/get-multiple-returns")
-		nodes.POST("/raise-complaint")
+		nodes.POST("/", nodeHandler.CreateNode)
+		nodes.POST("/all", nodeHandler.GetNodes)
+		nodes.POST("/complaints", nodeHandler.GetComplaints)
+		nodes.POST("/returns", nodeHandler.GetReturns)
+		nodes.POST("/multiple-returns", nodeHandler.GetMultipleReturns)
+		nodes.POST("/raise-complaint", nodeHandler.RaiseComplaint)
 
-		nodes.PATCH("/:nodeId")
-		nodes.PATCH("/:nodeId/:status")
+		nodes.PATCH("/:nodeId", nodeHandler.UpdateNode)
+		nodes.PATCH("/:nodeId/:status", nodeHandler.UpdateNodeStatus)
 	}
 
 	packages := router.Group("/api/v1/packages")
@@ -230,7 +236,7 @@ func SetupRoutes(router *gin.Engine) {
 		routes.GET("/node-list")
 
 		routes.POST("/")
-		routes.POST("/get-paginated-data")
+		routes.POST("/all")
 
 		routes.PATCH("/:routeId")
 		routes.PATCH("/:routeId/:status")
