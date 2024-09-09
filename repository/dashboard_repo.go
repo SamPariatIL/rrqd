@@ -1,5 +1,7 @@
 package repository
 
+import "go.mongodb.org/mongo-driver/mongo"
+
 type DashboardRepository interface {
 	GetAdminDashboard()
 	GetNodeDashboard()
@@ -12,10 +14,12 @@ type DashboardRepository interface {
 	GetReturnDetails()
 }
 
-type dashboardRepository struct{}
+type dashboardRepository struct {
+	db *mongo.Database
+}
 
-func NewDashboardRepository() DashboardRepository {
-	return &dashboardRepository{}
+func NewDashboardRepository(db *mongo.Database) DashboardRepository {
+	return &dashboardRepository{db: db}
 }
 
 func (dr *dashboardRepository) GetAdminDashboard() {}

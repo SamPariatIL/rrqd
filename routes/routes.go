@@ -1,8 +1,34 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/SamPariatIL/rrqd/handlers"
+	"github.com/SamPariatIL/rrqd/repository"
+	"github.com/SamPariatIL/rrqd/services"
+	"github.com/SamPariatIL/rrqd/vendors"
+	"github.com/gin-gonic/gin"
+)
 
 func SetupRoutes(router *gin.Engine) {
+	db := vendors.Database
+
+	// transactionManager := utils.NewTransactionManager(db)
+
+	dashboardRepository := repository.NewDashboardRepository(db)
+	dashboardService := services.NewDashboardService(dashboardRepository)
+	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
+
+	dropdownRepository := repository.NewDropdownRepository(db)
+	dropdownService := services.NewDropdownService(dropdownRepository)
+	dropdownHandler := handlers.NewDropdownHandler(dropdownService)
+
+	packageRepository := repository.NewPackageRepository(db)
+	packageService := services.NewPackageService(packageRepository)
+	packageHandler := handlers.NewPackageHandler(packageService)
+
+	userRepository := repository.NewUserRepository(db)
+	userService := services.NewUserService(userRepository)
+	userHandler := handlers.NewUserHandler(userService)
+
 	auth := router.Group("/api/v1/auth")
 	{
 		auth.GET("/refresh-token")
@@ -23,16 +49,16 @@ func SetupRoutes(router *gin.Engine) {
 
 	dashboard := router.Group("/api/v1/dashboard")
 	{
-		dashboard.GET("/admin")
-		dashboard.GET("/node")
-		dashboard.GET("/vendor")
-		dashboard.GET("/package-details")
-		dashboard.GET("/bag-details")
-		dashboard.GET("/return-details")
+		dashboard.GET("/admin", dashboardHandler.GetAdminBags)
+		dashboard.GET("/node", dashboardHandler.GetNodeDashboard)
+		dashboard.GET("/vendor", dashboardHandler.GetVendorDashboard)
+		dashboard.GET("/package-details", dashboardHandler.GetPackageDetails)
+		dashboard.GET("/bag-details", dashboardHandler.GetBagDetails)
+		dashboard.GET("/return-details", dashboardHandler.GetReturnDetails)
 
-		dashboard.POST("/admin-packages")
-		dashboard.POST("/admin-bags")
-		dashboard.POST("/admin-returns")
+		dashboard.POST("/admin-packages", dashboardHandler.GetAdminPackages)
+		dashboard.POST("/admin-bags", dashboardHandler.GetAdminBags)
+		dashboard.POST("/admin-returns", dashboardHandler.GetAdminReturns)
 	}
 
 	deliveries := router.Group("/api/v1/deliveries")
@@ -65,21 +91,21 @@ func SetupRoutes(router *gin.Engine) {
 
 	dropdowns := router.Group("/api/v1/dropdowns")
 	{
-		dropdowns.GET("/states")
-		dropdowns.GET("/freights")
-		dropdowns.GET("/cities")
-		dropdowns.GET("/pincodes")
-		dropdowns.GET("/roles")
-		dropdowns.GET("/nodes")
-		dropdowns.GET("/vendors")
-		dropdowns.GET("/nodes/:nodeId")
-		dropdowns.GET("/node-in-charges")
-		dropdowns.GET("/node/riders")
-		dropdowns.GET("/city/:cityId/nodes")
-		dropdowns.GET("/issue-types")
-		dropdowns.GET("/pincode-details")
-		dropdowns.GET("/vendors-by-node-id")
-		dropdowns.GET("/node-hub")
+		dropdowns.GET("/states", dropdownHandler.GetStates)
+		dropdowns.GET("/freights", dropdownHandler.GetFreights)
+		dropdowns.GET("/cities", dropdownHandler.GetCities)
+		dropdowns.GET("/pincodes", dropdownHandler.GetPincodes)
+		dropdowns.GET("/roles", dropdownHandler.GetRoles)
+		dropdowns.GET("/nodes", dropdownHandler.GetNodes)
+		dropdowns.GET("/vendors", dropdownHandler.GetVendors)
+		dropdowns.GET("/nodes/:nodeId", dropdownHandler.GetNodeSections)
+		dropdowns.GET("/node-incharges", dropdownHandler.GetNodeIncharges)
+		dropdowns.GET("/node/riders", dropdownHandler.GetNodeRiders)
+		dropdowns.GET("/city/:cityId/nodes", dropdownHandler.GetCityNodes)
+		dropdowns.GET("/issue-types", dropdownHandler.GetIssueTypes)
+		dropdowns.GET("/pincode-details", dropdownHandler.GetPincodeDetails)
+		dropdowns.GET("/vendors/:nodeId", dropdownHandler.GetVendorsByNodeId)
+		dropdowns.GET("/node-hub", dropdownHandler.GetNodeHubs)
 	}
 
 	issues := router.Group("/api/v1/issues")
@@ -95,8 +121,8 @@ func SetupRoutes(router *gin.Engine) {
 
 	locations := router.Group("/api/v1/locations")
 	{
-		locations.GET("/:locationId")
 		locations.GET("/")
+		locations.GET("/:locationId")
 
 		locations.POST("/")
 
@@ -134,30 +160,30 @@ func SetupRoutes(router *gin.Engine) {
 
 	packages := router.Group("/api/v1/packages")
 	{
-		packages.GET("/")
-		packages.GET("/:packageId")
-		packages.GET("/previous-issue")
+		packages.GET("/", packageHandler.GetPackages)
+		packages.GET("/:packageId", packageHandler.GetPackageById)
+		packages.GET("/previous-issue", packageHandler.GetPreviousIssue)
 
-		packages.POST("/")
-		packages.POST("/scan")
+		packages.POST("/", packageHandler.CreatePackage)
+		packages.POST("/scan", packageHandler.ScanPackage)
 		packages.POST("/create-bag")
-		packages.POST("/scan-bag")
-		packages.POST("/assign-transport")
+		packages.POST("/scan-bag", packageHandler.ScanBag)
+		packages.POST("/assign-transport", packageHandler.AssignTransport)
 		packages.POST("/create-issue")
 		packages.POST("/create-shipments")
-		packages.POST("/print")
-		packages.POST("/incharge/assign-rider")
+		packages.POST("/print", packageHandler.UpdatePrintStatus)
+		packages.POST("/incharge/assign-rider", packageHandler.AssignRider)
 		packages.POST("/all")
-		packages.POST("/bags/all")
-		packages.POST("/bulk")
-		packages.POST("/returns")
-		packages.POST("/initiate-return")
-		packages.POST("/bulk-returns")
+		packages.POST("/bags/all", packageHandler.GetSelectedBags)
+		packages.POST("/bulk", packageHandler.CreateBulkReturns)
+		packages.POST("/returns", packageHandler.GetReturns)
+		packages.POST("/initiate-return", packageHandler.InitiateReturn)
+		packages.POST("/bulk-returns", packageHandler.CreateBulkReturns)
 
-		packages.PATCH("/receive")
-		packages.PATCH("/move")
-		packages.PATCH("/receive/bag")
-		packages.PATCH("/move/bag")
+		packages.PATCH("/receive", packageHandler.ReceivePackage)
+		packages.PATCH("/move", packageHandler.MovePackage)
+		packages.PATCH("/receive/bag", packageHandler.ReceiveBag)
+		packages.PATCH("/move/bag", packageHandler.MoveBag)
 	}
 
 	payments := router.Group("/api/v1/payments")
@@ -212,13 +238,13 @@ func SetupRoutes(router *gin.Engine) {
 
 	users := router.Group("/api/v1/users")
 	{
-		users.GET("/")
-		users.GET("/:userId")
+		users.GET("/", userHandler.GetUsers)
+		users.GET("/:userId", userHandler.GetUserById)
 
-		users.POST("/")
+		users.POST("/", userHandler.CreateUser)
 
-		users.PATCH("/:userId")
-		users.PATCH("/:userId/:status")
+		users.PATCH("/:userId", userHandler.UpdateUser)
+		users.PATCH("/:userId/:status", userHandler.UpdateUserStatus)
 	}
 
 	vendors := router.Group("/api/v1/vendors")

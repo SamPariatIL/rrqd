@@ -17,7 +17,7 @@ type DropdownRepository interface {
 	GetVendors()
 	GetVendorsByNodeId()
 	GetNodeSections()
-	GetNodeIncharge()
+	GetNodeIncharges()
 	GetNodeRiders()
 	GetPincodeDetails()
 	GetNodeHubs()
@@ -65,7 +65,7 @@ func (dr *dropdownRepository) GetVendorsByNodeId() {}
 
 func (dr *dropdownRepository) GetNodeSections() {}
 
-func (dr *dropdownRepository) GetNodeIncharge() {}
+func (dr *dropdownRepository) GetNodeIncharges() {}
 
 func (dr *dropdownRepository) GetNodeRiders() {}
 
