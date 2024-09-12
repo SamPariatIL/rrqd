@@ -5,11 +5,13 @@ import (
 	"os"
 	"strconv"
 	"sync"
+
+	"github.com/joho/godotenv"
 )
 
 var (
 	conf *Config
-	once *sync.Once
+	once sync.Once
 )
 
 type Config struct {
@@ -116,6 +118,12 @@ func loadConfig() (*Config, error) {
 func GetConfig() *Config {
 	once.Do(func() {
 		var err error
+
+		err = godotenv.Load()
+		if err != nil {
+			log.Fatalf("Failed to load .env %s", err)
+		}
+
 		conf, err = loadConfig()
 		if err != nil {
 			log.Fatalf("Failed to load configuration %s", err)

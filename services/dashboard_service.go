@@ -1,5 +1,7 @@
 package services
 
+import "github.com/SamPariatIL/rrqd/repository"
+
 type DashboardService interface {
 	GetAdminDashboard()
 	GetNodeDashboard()
@@ -13,10 +15,13 @@ type DashboardService interface {
 }
 
 type dashboardService struct {
+	dashboardRepo repository.DashboardRepository
 }
 
-func NewDashboardService() DashboardService {
-	return &dashboardService{}
+func NewDashboardService(dr repository.DashboardRepository) DashboardService {
+	return &dashboardService{
+		dashboardRepo: dr,
+	}
 }
 
 func (ds *dashboardService) GetAdminDashboard() {}
