@@ -25,6 +25,14 @@ func SetupRoutes(router *gin.Engine) {
 	dropdownService := services.NewDropdownService(dropdownRepository)
 	dropdownHandler := handlers.NewDropdownHandler(dropdownService)
 
+	issueRepository := repository.NewIssueRepository(db)
+	issueService := services.NewIssueService(issueRepository)
+	issueHandler := handlers.NewIssueHandler(issueService)
+
+	locationRepository := repository.NewLocationRepository(db)
+	locationService := services.NewLocationService(locationRepository)
+	locationHandler := handlers.NewLocationHandler(locationService)
+
 	nodeRepository := repository.NewNodeRepository(db)
 	nodeService := services.NewNodeService(nodeRepository)
 	nodeHandler := handlers.NewNodeHandler(nodeService)
@@ -118,8 +126,8 @@ func SetupRoutes(router *gin.Engine) {
 
 	issues := router.Group("/api/v1/issues")
 	{
+		issues.GET("/", issueHandler.GetIssues)
 		issues.GET("/:issueId")
-		issues.GET("/issues")
 
 		issues.POST("/")
 		issues.POST("/new")
@@ -129,7 +137,7 @@ func SetupRoutes(router *gin.Engine) {
 
 	locations := router.Group("/api/v1/locations")
 	{
-		locations.GET("/")
+		locations.GET("/", locationHandler.GetLocations)
 		locations.GET("/:locationId")
 
 		locations.POST("/")
